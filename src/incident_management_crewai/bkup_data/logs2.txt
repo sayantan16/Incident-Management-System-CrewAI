@@ -1,0 +1,6 @@
+[2024-12-04 10:20:47] WARNING: High memory usage detected.
+Details: Application 'Order Processing' is consuming 95% of available memory.
+Potential Memory Leak in module: payment_gateway_integration.py
+Memory Usage: 95%
+Affected Service: Order Processing Service
+Host: app-server-02.company.com
