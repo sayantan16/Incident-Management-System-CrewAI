@@ -1,25 +1,33 @@
 monitor_system_logs:
   description: >
-    Process a single system log entry to organize it into a structured JSON format. The task involves:
-      - Parsing the log entry to extract the following fields:
+    Process a single system log entry to organize it into a structured JSON format dynamically using LLM reasoning. The task involves:
+      - Parsing the log entry, whether it is structured (e.g., JSON, key-value pairs) or unstructured (e.g., raw text).
+      - Extracting and normalizing the following fields:
         - Timestamp: The date and time of the log entry (e.g., [2024-12-04 08:45:23]).
         - Severity: The severity level of the event (e.g., INFO, WARNING, ERROR, CRITICAL).
         - Component: The system or application component generating the log (e.g., User Authentication Service).
-        - Message: A description of the log event (e.g., ERROR: Unable to establish database connection - Details: Connection timed out after 30 seconds).
-        - Source: The source of the log, typically the host or system name (e.g., auth-server-01.company.com). Look for keyword in the log like host or any system name coming up.
+        - Message: A concise description of the log event (e.g., ERROR: Unable to establish database connection - Details: Connection timed out after 30 seconds).
+        - Source: The source of the log, typically the host or system name (e.g., auth-server-01.company.com). Look for keywords like "host" or any identifiable system name.
         - Stack Trace: Any stack trace details present in the log, useful for debugging application errors.
         - Additional Details: Any extra information in the log entry, such as resource metrics, error codes, or affected modules.
 
-    - Ensure the following:
-      - If any field is missing from the raw log, fill it with default values like "unknown", "N/A", or leave it empty.
-      - Include all expected fields in the output JSON object to maintain consistency for downstream processing.
+    - Leveraging LLM reasoning for dynamic interpretation:
+      - Detect and interpret log format (e.g., JSON, key-value pairs, or free text).
+      - Infer missing fields where possible based on context.
+      - Dynamically add extra elements or metadata not explicitly listed in the structure but found in the log.
 
-    - The final output must be a structured JSON object containing all extracted fields, even if default values are used for missing information.
+    - Ensuring Consistency:
+      - If any field is missing or undefined, fill it with default values like "unknown", "N/A", or leave it empty.
+      - Include all required fields in the output JSON object for downstream processing.
+
+    - The final output must be a structured JSON object that:
+      - Maintains consistency and integrity.
+      - Dynamically incorporates relevant additional data detected by the LLM.
 
     Log entry: {log_file_path}
 
   expected_output: >
-    A JSON object with the following structure: {{
+    A dynamically constructed JSON object with the following baseline structure: {{
       "timestamp": "<timestamp or 'unknown'>",
       "severity": "<severity or 'unknown'>",
       "component": "<component or 'N/A'>",
@@ -33,11 +41,18 @@ monitor_system_logs:
           "memory_usage": "<memory usage details, else null>",
           "cpu_usage": "<CPU usage details, else null>"
         }},
-        "additional_info": "<any other relevant information>"
+        "additional_info": "<any other relevant information dynamically detected>"
+      }},
+      "dynamic_fields": {{
+        "field_name": "<Value>",
+        ...
       }}
     }}
 
-    Output Requirements: - The output must be a single JSON object. - Include all fields, even if they are filled with default values. - Ensure the output is structured for ease of use by downstream agents.
+    Output Requirements:
+      - The output must be a single JSON object.
+      - Include all expected fields, even if populated with default values.
+      - Dynamically incorporate any extra fields or metadata detected by the LLM.
 
   agent: monitoring_agent
 

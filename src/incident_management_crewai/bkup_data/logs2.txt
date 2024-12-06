@@ -1,6 +1,10 @@
-[2024-12-04 10:20:47] WARNING: High memory usage detected.
-Details: Application 'Order Processing' is consuming 95% of available memory.
-Potential Memory Leak in module: payment_gateway_integration.py
-Memory Usage: 95%
-Affected Service: Order Processing Service
-Host: app-server-02.company.com
+{
+  "client": null,
+  "client_url": null,
+  "contexts": null,
+  "description": "ABC Applications: High Memory Consumption - system.memory.actual.used.pct is 95.1% in the last 10 mins for XXXXXXX Alert when > 95%.",
+  "event_type": "trigger",
+  "incident_key": "sdhfg-bdshdfsjdkbdfs-6-11ef-b5c0-ade465fabcdef:abcdcorp",
+  "service_key": "75f45dfbdfghdfger45675eddffgc00",
+  "details": null
+}

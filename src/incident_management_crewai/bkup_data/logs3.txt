@@ -1,3 +1,12 @@
-[2024-12-04 10:45:00] INFO: Service health check passed for all application modules.
-Details: All 12 modules responded successfully within 300ms.
-Host: app-healthcheck-01.company.com
+Labels
+alertname = high_cpu
+app_group = APP!
+hostname = wertyu24
+instance = acbpdafpp04.tsu.abcd.com:4545
+job = node_exporter
+service = os
+severity = critical
+
+Annotations
+description = High CPU utilisation detected for instance tagged as: , the utilisation is currently:94.902083333352625%
+summary = CPU Utilisation Alert

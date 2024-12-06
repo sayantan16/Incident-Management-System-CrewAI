@@ -1,4 +1,4 @@
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph  # type: ignore
 from incident_management_crewai.state import LogState
 from .nodes import Nodes
 from incident_management_crewai.crew import IncidentManagementCrewai

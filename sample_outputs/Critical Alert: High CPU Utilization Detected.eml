@@ -1,0 +1,52 @@
+MIME-Version: 1.0
+From: noreply@simulation.com
+To: stakeholder@example.com
+Subject: Critical Alert: High CPU Utilization Detected
+Message-ID: J6aUDykzkfftPxUa_AJ5-ZFQTAatHTaxnuMarhPvdQk=@mailhog.example
+Received: from 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa by mailhog.example (MailHog)
+          id J6aUDykzkfftPxUa_AJ5-ZFQTAatHTaxnuMarhPvdQk=@mailhog.example; Fri, 06 Dec 2024 14:26:40 -0500
+Return-Path: <noreply@simulation.com>
+Content-Type: multipart/mixed; boundary="===============2190196074740737254=="
+
+--===============2190196074740737254==
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+<html>
+    <body>
+        <h2>Incident Overview</h2>
+        <p><b>Timestamp:</b> unknown</p>
+        <p><b>Severity:</b> critical</p>
+        <p><b>Component:</b> N/A</p>
+        <p><b>Message:</b> High CPU utilisation detected for instance tagged as: , the utilisation is currently:94.902083333352625%</p>
+        <p><b>Source:</b> wertyu24</p>
+        
+        <h2>Incident Metadata</h2>
+        <p><b>Incident ID:</b> unique_identifier_123</p>
+        <p><b>Priority:</b> Critical</p>
+        <p><b>Reason:</b> The incident has been classified as Critical due to the immediate impact of High CPU utilization which can lead to performance degradation or service unavailability. It requires immediate attention to prevent further issues and ensure system stability.</p>
+        
+        <h2>Root Cause Analysis</h2>
+        <p><b>Summary:</b> The high CPU utilization is likely caused by inefficient application code or a resource-intensive process running on the system.</p>
+        <p><b>Validation Steps:</b> The RCA was determined by analyzing historical incidents with high resource usage patterns and considering the potential impact on system performance and stability. Immediate investigation and optimization of the application code or process is recommended to reduce CPU load.</p>
+        
+        <h2>Suggested Resolutions</h2>
+        
+        <h3>Internet-Sourced Resolutions</h3>
+        <ul>
+            <li><a href='https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/identify-high-cpu-consuming-containers-aks'>Identify the nodes and containers consuming high CPU in an AKS cluster - Azure</a></li>
+            <li><a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/troubleshoot-high-cpu-issues-azure-windows-vm'>Troubleshoot high-CPU issues for Azure virtual machines - Virtual Machines</a></li>
+        </ul>
+        
+        <h3>LLM-Generated Resolutions</h3>
+        <ol>
+            <li>Perform a detailed analysis of the running applications and processes to identify any resource-intensive components causing the high CPU utilization.</li>
+            <li>Implement performance monitoring tools to continuously track CPU usage and proactively optimize the system to maintain stable performance levels.</li>
+        </ol>
+        
+        <h2>Action Required</h2>
+        <p>Immediate investigation and optimization of the application code or process to reduce CPU load.</p>
+    </body>
+</html>
+--===============2190196074740737254==--

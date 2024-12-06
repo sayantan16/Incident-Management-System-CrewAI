@@ -1,0 +1,48 @@
+Message-ID: wucbHg7vzlDxcAPlyaaNqj0n9MuAkePqlb5gYHLZ4e4=@mailhog.example
+Received: from 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa by mailhog.example (MailHog)
+          id wucbHg7vzlDxcAPlyaaNqj0n9MuAkePqlb5gYHLZ4e4=@mailhog.example; Fri, 06 Dec 2024 14:25:13 -0500
+Return-Path: <noreply@simulation.com>
+Content-Type: multipart/mixed; boundary="===============1206680844025254645=="
+MIME-Version: 1.0
+From: noreply@simulation.com
+To: stakeholder@example.com
+Subject: Alert: High Memory Consumption Detected in ABC Applications
+
+--===============1206680844025254645==
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+
+<html>
+                <body>
+                    <h2>Incident Overview:</h2>
+                    <p><strong>Timestamp:</strong> unknown</p>
+                    <p><strong>Severity:</strong> unknown</p>
+                    <p><strong>Component:</strong> N/A</p>
+                    <p><strong>Message:</strong> ABC Applications: High Memory Consumption - system.memory.actual.used.pct is 95.1% in the last 10 mins for XXXXXXX Alert when &gt; 95%.</p>
+                    <p><strong>Source:</strong> unknown</p>
+                    <h2>Incident Metadata:</h2>
+                    <p><strong>Incident ID:</strong> unique_identifier_123</p>
+                    <p><strong>Priority:</strong> High</p>
+                    <p><strong>Reason:</strong> The incident is classified as ERROR (2) and High priority due to the high memory consumption (95.1%) in the last 10 mins, which indicates a potential issue affecting system performance and requiring attention to prevent further disruptions.</p>
+                    <h2>Root Cause Analysis:</h2>
+                    <p><strong>Summary:</strong> The root cause of the high memory consumption is likely a memory leak issue within the application's codebase.</p>
+                    <p><strong>Validation Steps:</strong> Cross-referenced with historical incidents, similar patterns of high memory consumption and memory leak issues were identified. This suggests a recurring problem related to memory management in the system, potentially leading to performance degradation and system instability.</p>
+                    <h2>Suggested Resolutions:</h2>
+                    <p><strong>Internet-Sourced Resolutions:</strong>
+                        <ul>
+                            <li><a href='https://www.cisco.com/c/en/us/td/docs/routers/access/4400/troubleshooting/memorytroubleshooting/isr4000_mem.html'>Memory Troubleshooting Guide for Cisco 4000 Series ISRs</a></li>
+                            <li><a href='https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/sw/6-x/troubleshooting/guide/b_Cisco_Nexus_9000_Series_NX-OS_Troubleshooting_Guide/b_Cisco_Standalone_Series_NX-OS_Troubleshooting_Guide_chapter_01100.html'>Cisco Nexus 9000 Series NX-OS Troubleshooting Guide, Release 6.x - Troubleshooting Memory</a></li>
+                        </ul>
+                    </p>
+                    <p><strong>LLM-Generated Resolutions:</strong>
+                        <ul>
+                            <li>Implement memory leak detection tools to continuously monitor and identify memory leaks within the application's codebase.</li>
+                            <li>Optimize memory management approaches to reduce high memory consumption, potentially by implementing resource pooling or efficient memory allocation strategies.</li>
+                        </ul>
+                    </p>
+                    <h2>Action Required:</h2>
+                    <p>Immediate action is required to address the high memory consumption issue to prevent system performance degradation.</p>
+                </body>
+            </html>
+--===============1206680844025254645==--
