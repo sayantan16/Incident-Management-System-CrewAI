@@ -1,0 +1,10 @@
+digraph Workflow {
+    "monitor_logs" [shape=box];
+    "process_log" [shape=box];
+    "wait" [shape=box];
+    "wait" -> "monitor_logs";
+    "__start__" -> "monitor_logs";
+    "process_log" -> "monitor_logs";
+    "monitor_logs" -> "process_log" [label="continue"];
+    "monitor_logs" -> "wait" [label="end"];
+}
