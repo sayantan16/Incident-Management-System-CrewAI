@@ -45,35 +45,6 @@ def format_email(self, incident_details):
     </html>"""
     return body
 
-
-# def run_agents(self, incident_details):
-#     """Run agents sequentially based on the tasks."""
-#     try:
-#         print("### Classifying Incident Severity")
-#         self.classification_agent.run_task(
-#             "classify_incident_severity", inputs=incident_details)
-
-#         print("### Performing Root Cause Analysis")
-#         self.rca_agent.run_task(
-#             "perform_root_cause_analysis", inputs=incident_details)
-
-#         print("### Suggesting Resolutions")
-#         self.resolution_agent.run_task(
-#             "suggest_resolutions", inputs=incident_details)
-
-#         print("### Notifying Stakeholders")
-#         self.notification_agent.run_task(
-#             "notify_stakeholders", inputs=incident_details)
-
-#         print("### Collecting Feedback")
-#         self.feedback_agent.run_task(
-#             "collect_and_process_feedback", inputs=incident_details)
-
-#     except Exception as e:
-#         print(f"Error while running agents: {e}")
-#         raise
-
-
 # def process_feedback(self, incident_details):
 #     print("\nWas the resolution effective?")
 #     feedback = input().strip().lower()
@@ -131,7 +102,6 @@ class IncidentManagementCrewai():
     @agent
     def monitoring_agent(self) -> Agent:
         return Agent(
-            # Default config if any
             config=self.agents_config['monitoring_agent'],
             tools=[FileReadTool()],
             verbose=True,
@@ -215,19 +185,12 @@ class IncidentManagementCrewai():
             on_run=lambda incident_details: self.notification_agent.run_tool(
                 tool_name="EmailSimulationTool",
                 arguments={
-                    "recipient_email": "stakeholder@example.com",  # Replace with recipient email
+                    "recipient_email": "stakeholder@example.com",
                     "subject": f"CRITICAL incident in {incident_details['component']} on {incident_details['timestamp']}",
                     "body": self.format_email(incident_details),
                 }
             )
         )
-
-    # @task
-    # def process_log_task(self, log_content: str) -> Task:
-    #     return Task(
-    #         description=f"Process the log content:\n{log_content}",
-    #         on_run=lambda incident_details: self.run_agents(incident_details)
-    #     )
 
     # @task
     # def collect_and_process_feedback(self) -> Task:

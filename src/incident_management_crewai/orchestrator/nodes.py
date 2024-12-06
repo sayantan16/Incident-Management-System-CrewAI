@@ -12,7 +12,7 @@ class Nodes:
         existing_logs = state.get("log_queue", [])
         processed_logs = state.get("processed_logs", [])
 
-        all_logs = os.listdir(self.log_dir)  # List all files in the directory
+        all_logs = os.listdir(self.log_dir)
         new_logs = [
             log for log in all_logs
             if log not in existing_logs and log not in processed_logs
@@ -28,7 +28,6 @@ class Nodes:
             state["empty_checks"] = state.get("empty_checks", 0) + 1
         else:
             state["log_queue"].extend(new_logs)
-            # Reset empty checks when new logs are found
             state["empty_checks"] = 0
 
         return state
@@ -46,7 +45,7 @@ class Nodes:
             print("## No logs to process")
             return state
 
-        log_file = state["log_queue"].pop(0)  # Get first log from the queue
+        log_file = state["log_queue"].pop(0)
         print(f"### Processing log: {log_file}")
 
         try:

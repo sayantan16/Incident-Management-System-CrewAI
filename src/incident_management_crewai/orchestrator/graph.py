@@ -6,7 +6,6 @@ from incident_management_crewai.crew import IncidentManagementCrewai
 
 class LogOrchestrator:
     def __init__(self):
-        # Initialize CrewAI and Nodes
         self.crew_ai = IncidentManagementCrewai()
         self.nodes = Nodes(
             log_dir="/Users/sayantankundu/Documents/incident_management_crewai/src/incident_management_crewai/data", crew_ai=self.crew_ai)
@@ -17,7 +16,6 @@ class LogOrchestrator:
         self.workflow.add_node("process_log", self.nodes.process_single_log)
         self.workflow.add_node("wait", self.nodes.wait_next_run)
 
-        # Define workflow transitions
         self.workflow.set_entry_point("monitor_logs")
         self.workflow.add_conditional_edges(
             "monitor_logs",

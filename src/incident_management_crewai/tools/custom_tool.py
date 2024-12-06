@@ -25,27 +25,19 @@ class EmailSimulationTool(BaseTool):
     args_schema: Type[BaseModel] = EmailSimulationToolInput
 
     def _run(self, recipient_email: str, subject: str, body: str) -> str:
-        # Email simulation setup
-        # Use "smtp.gmail.com" or another server if sending real emails
         smtp_server = "localhost"
-        smtp_port = 1025           # Port for local testing; change to 587 or 465 for production
-        sender_email = "noreply@simulation.com"  # Simulated sender address
+        smtp_port = 1025
+        sender_email = "noreply@simulation.com"
 
         try:
-            # Create the email message
             msg = MIMEMultipart()
             msg["From"] = sender_email
             msg["To"] = recipient_email
             msg["Subject"] = subject
 
-            # Attach the email body
-            # Use "plain" if sending plain text
             msg.attach(MIMEText(body, "html"))
 
-            # Connect to the SMTP server
             with smtplib.SMTP(smtp_server, smtp_port) as server:
-                # Uncomment the next line to send real emails with authentication
-                # server.login("<your_email>", "<your_password>")
                 server.sendmail(sender_email, recipient_email, msg.as_string())
 
             return f"Email successfully sent to {recipient_email} with subject '{subject}'."
@@ -69,18 +61,14 @@ class AppendCSVRowTool(BaseTool):
 
     def _run(self, file_path: str, row_data: dict) -> str:
         try:
-            # Check if the file exists
             file_exists = os.path.exists(file_path)
 
-            # Open the file in append mode
             with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=row_data.keys())
 
-                # Write headers if the file is being created
                 if not file_exists:
                     writer.writeheader()
 
-                # Write the row data
                 writer.writerow(row_data)
 
             return f"Row successfully added to {file_path}."
