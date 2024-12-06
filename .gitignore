@@ -1,0 +1,7 @@
+.env
+__pycache__/
+.venv
+db
+src/incident_management_crewai/__pycache__
+src/incident_management_crewai/tools/__pycache__
+sample.json

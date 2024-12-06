@@ -1,0 +1,20 @@
+[project]
+name = "incident_management_crewai"
+version = "0.1.0"
+description = "incident_management_crewAI using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<=3.13"
+dependencies = [
+    "crewai[tools]>=0.83.0,<1.0.0"
+]
+
+[project.scripts]
+incident_management_crewai = "incident_management_crewai.main:run"
+run_crew = "incident_management_crewai.main:run"
+train = "incident_management_crewai.main:train"
+replay = "incident_management_crewai.main:replay"
+test = "incident_management_crewai.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

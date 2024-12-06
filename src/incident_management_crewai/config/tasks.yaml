@@ -1,0 +1,333 @@
+monitor_system_logs:
+  description: >
+    Process a single system log entry to organize it into a structured JSON format. The task involves:
+      - Parsing the log entry to extract the following fields:
+        - Timestamp: The date and time of the log entry (e.g., [2024-12-04 08:45:23]).
+        - Severity: The severity level of the event (e.g., INFO, WARNING, ERROR, CRITICAL).
+        - Component: The system or application component generating the log (e.g., User Authentication Service).
+        - Message: A description of the log event (e.g., ERROR: Unable to establish database connection - Details: Connection timed out after 30 seconds).
+        - Source: The source of the log, typically the host or system name (e.g., auth-server-01.company.com). Look for keyword in the log like host or any system name coming up.
+        - Stack Trace: Any stack trace details present in the log, useful for debugging application errors.
+        - Additional Details: Any extra information in the log entry, such as resource metrics, error codes, or affected modules.
+
+    - Ensure the following:
+      - If any field is missing from the raw log, fill it with default values like "unknown", "N/A", or leave it empty.
+      - Include all expected fields in the output JSON object to maintain consistency for downstream processing.
+
+    - The final output must be a structured JSON object containing all extracted fields, even if default values are used for missing information.
+
+    Log entry: {log_file_path}
+
+  expected_output: >
+    A JSON object with the following structure: {{
+      "timestamp": "<timestamp or 'unknown'>",
+      "severity": "<severity or 'unknown'>",
+      "component": "<component or 'N/A'>",
+      "message": "<message or 'No description available'>",
+      "source": "<source or 'unknown'>",
+      "stack_trace": "<stack trace if present, else null>",
+      "details": {{
+        "error_code": "<error code if present, else null>",
+        "affected_modules": "<affected modules if mentioned, else null>",
+        "metrics": {{
+          "memory_usage": "<memory usage details, else null>",
+          "cpu_usage": "<CPU usage details, else null>"
+        }},
+        "additional_info": "<any other relevant information>"
+      }}
+    }}
+
+    Output Requirements: - The output must be a single JSON object. - Include all fields, even if they are filled with default values. - Ensure the output is structured for ease of use by downstream agents.
+
+  agent: monitoring_agent
+
+classify_incident_severity:
+  description: >
+    Analyze a single structured incident log to assign severity and priority levels. The task involves:
+      1. Reviewing the log’s key details, including:
+         - Severity (initial indication, if present in input).
+         - Component (the affected system or application component).
+         - Message (event description or error details).
+         - Source (origin of the log).
+         - Stack Trace (if present, for debugging critical incidents).
+         - Additional Metadata (error codes, affected modules, resource metrics).
+      2. Assigning Severity and Priority:
+         - Severity levels:
+           - CRITICAL (1): Incidents causing immediate failure.
+           - ERROR (2): Errors disrupting functionality without full failure.
+           - WARNING (3): Issues needing attention but not affecting functionality.
+           - INFO (4): Informational logs with no required action.
+         - Priority levels (e.g., Critical, High, Medium, Low) based on severity and context.
+      3. Providing a detailed justification for the assigned severity and priority.
+
+    Steps: - Evaluate the log’s impact based on its details and metadata. - Correlate its context with known patterns or historical data, if relevant. - Assign a severity and priority, ensuring the reasoning reflects the decision-making process.
+
+    Input: A single structured log object provided as input. Example: {{
+      "timestamp": "<timestamp>",
+      "severity": "<initial severity if available>",
+      "component": "<component>",
+      "message": "<message>",
+      "source": "<source>",
+      "stack_trace": "<stack trace or null>",
+      "details": {{
+        "error_code": "<error code or null>",
+        "affected_modules": "<affected modules or null>",
+        "metrics": {{
+          "memory_usage": "<memory usage or null>",
+          "cpu_usage": "<CPU usage or null>"
+        }},
+        "additional_info": "<any other relevant information>"
+      }}
+    }}
+
+  expected_output: >
+    A JSON object containing the original input data, with an additional `incident_metadata` field: {{
+      "timestamp": "<timestamp>",
+      "severity": "<severity>",
+      "component": "<component>",
+      "message": "<message>",
+      "source": "<source>",
+      "stack_trace": "<stack trace or null>",
+      "details": {{
+        "error_code": "<error code or null>",
+        "affected_modules": "<affected modules or null>",
+        "metrics": {{
+          "memory_usage": "<memory usage or null>",
+          "cpu_usage": "<CPU usage or null>"
+        }},
+        "additional_info": "<any other relevant information>"
+      }},
+      "incident_metadata": {{
+        "incident_id": "<unique identifier>",
+        "severity": "<assigned severity>",
+        "priority": "<assigned priority>",
+        "reason": "<detailed justification>"
+      }}
+    }}
+
+    Output Requirements: - Preserve the original log structure and fields. - Add an `incident_metadata` field containing:
+      - `incident_id`: A unique identifier for the incident.
+      - `severity`: The assigned severity level (1-4).
+      - `priority`: The assigned priority level (Critical, High, Medium, Low).
+      - `reason`: A detailed explanation of the classification decision.
+
+  agent: classification_agent
+
+perform_root_cause_analysis:
+  description: >
+    Analyze a single incident to determine its root cause by leveraging historical data and LLM reasoning. This task involves:
+      1. Historical Data Search:
+         - Search for similar incidents in historical incident data stored in a CSV file. The path to csv file is {csv_file_path}
+         - Match fields such as `component`, `severity`, and `message` to find patterns or similar past incidents.
+         - Use the RCA summaries of similar incidents as references but adapt them to the specific context of the current incident.
+      2. LLM-Based Reasoning:
+         - Use LLM reasoning to:
+           - Validate or refine RCAs derived from historical data.
+           - Independently generate RCAs for incidents where no historical match is found.
+         - Incorporate the following fields for analysis:
+           - Metadata (e.g., severity, priority, reason).
+           - Details (e.g., stack trace, metrics, error codes, affected modules).
+           - Contextual understanding of the incident's potential impact.
+      3. RCA Integration:
+         - Add a `root_cause_analysis` field to the incident object, containing:
+           - `summary`: A clear, concise explanation of the root cause.
+           - `validation_steps`: A description of the process used to determine the RCA, including historical comparisons and LLM reasoning.
+
+    Steps to Process the Input:
+      - Accept a single incident object as input.
+      - Perform the following:
+         - Search historical data for patterns or matches to enhance the RCA.
+         - Apply LLM reasoning for validation or independent RCA generation.
+         - Append a `root_cause_analysis` field to the input object without altering any other fields.
+      - Return the enriched incident object as output.
+
+    Error Handling:
+      - Handle incomplete or malformed fields gracefully by:
+        - Substituting `"N/A"` or `null` for missing data.
+        - Proceeding with LLM reasoning even if historical matches are unavailable.
+
+    Output Requirements:
+      - Return the original incident object with an appended `root_cause_analysis` field:
+        - The structure of the input object must remain intact.
+        - Only the `root_cause_analysis` field should be added.
+        - Ensure clarity and accuracy in the RCA content, making it actionable for downstream processes.
+
+  expected_output: >
+    A JSON object containing the original input with the additional `root_cause_analysis` field. Example: {{
+      "timestamp": "<timestamp>",
+      "severity": "<severity>",
+      "component": "<component>",
+      "message": "<message>",
+      "source": "<source>",
+      "stack_trace": "<stack trace or null>",
+      "details": {{
+        "error_code": "<error code or null>",
+        "affected_modules": "<affected modules or null>",
+        "metrics": {{
+          "memory_usage": "<memory usage or null>",
+          "cpu_usage": "<CPU usage or null>"
+        }},
+        "additional_info": "<any other relevant information>"
+      }},
+      "incident_metadata": {{
+        "incident_id": "<incident ID>",
+        "severity": "<severity level>",
+        "priority": "<priority level>",
+        "reason": "<incident reason>"
+      }},
+      "root_cause_analysis": {{
+        "summary": "A concise and actionable root cause analysis.",
+        "validation_steps": "Detailed steps on how the RCA was derived, including LLM insights and historical comparisons."
+      }}
+    }}
+
+  agent: rca_agent
+
+suggest_resolutions:
+  description: >
+    Enrich a single incident object with actionable solutions derived from external and internal analysis. 
+
+    Task Steps: - Process the incident object as follows:
+      1. Internet Search (Exa Search Tool):
+         - Retrieve contextual resolutions based on the incident details.
+         - Construct a search query using fields like `component`, `message`, and `root_cause_analysis.summary`.
+         - Append the results to the incident object under the `internet_resolution` field:
+           - If relevant resolutions are found, include them as a list.
+           - If no resolutions are found, append `"No relevant resolutions found on the internet."`.
+      2. LLM-Based Reasoning:
+         - Analyze the incident object holistically.
+         - Generate two logical and actionable resolutions tailored to the incident.
+         - Append these to the `llm_resolution` field of the incident object.
+    - Ensure that:
+      - The original structure and fields of the incident object are preserved.
+      - Only the `internet_resolution` and `llm_resolution` fields are added.
+
+    Error Handling: - Handle missing or null fields gracefully by:
+      - Using default values like `"N/A"` or `null` for missing information.
+      - Allowing the LLM to adapt to incomplete data for resolution generation.
+
+    Output Requirements: - Return the enriched incident object with two additional fields:
+      - `internet_resolution`: Resolutions retrieved using the Exa Search tool.
+      - `llm_resolution`: Resolutions generated by the LLM.
+    - Ensure the original structure of the incident object remains intact.
+
+  expected_output: >
+    The output must be a JSON object with the following structure: {{
+      "timestamp": "<timestamp>",
+      "severity": "<severity>",
+      "component": "<component>",
+      "message": "<message>",
+      "source": "<source>",
+      "stack_trace": "<stack trace or null>",
+      "details": {{
+        "error_code": "<error code or null>",
+        "affected_modules": "<affected modules or null>",
+        "metrics": {{
+          "memory_usage": "<memory usage or null>",
+          "cpu_usage": "<CPU usage or null>"
+        }},
+        "additional_info": "<any other relevant information>"
+      }},
+      "incident_metadata": {{
+        "incident_id": "<incident ID>",
+        "severity": "<severity level>",
+        "priority": "<priority level>",
+        "reason": "<incident reason>"
+      }},
+      "root_cause_analysis": {{
+        "summary": "<root cause analysis summary>",
+        "validation_steps": "<validation steps>"
+      }},
+      "internet_resolution": [
+        "Contextual resolution 1",
+        "Contextual resolution 2"
+      ],
+      "llm_resolution": [
+        "Actionable resolution 1",
+        "Actionable resolution 2"
+      ]
+    }}
+
+    Key Notes: - The original object is preserved with the appended `internet_resolution` and `llm_resolution` fields. - Ensure logical reasoning and relevance in all generated resolutions. - Avoid unnecessary reformatting or truncation of the original object.
+
+  agent: resolution_agent
+
+notify_stakeholders:
+  description: >
+    Create and send a detailed notification email based on the provided incident object. The task involves:
+      1. Transform Incident Object:
+         - Convert the structured incident object into an intuitive and human-readable email format.
+         - Include the following sections:
+           - Incident Overview: Summarize key details like `timestamp`, `severity`, `component`, `message`, `source`, and `stack_trace` for clarity.
+           - Incident Metadata: Present `incident_id`, `priority`, and `reason` for classification.
+           - Root Cause Analysis: Clearly explain the root cause with `summary` and `validation_steps`.
+           - Suggested Resolutions:
+             - Internet-Sourced Resolutions: Present `internet_resolution` as a bulleted list of external suggestions.
+             - LLM-Generated Resolutions: Highlight `llm_resolution` as actionable steps derived from reasoning.
+           - Action Required: Clearly indicate any immediate actions required by stakeholders.
+      2. Prepare Email Content:
+         - Use HTML for formatting the email body to enhance readability and visual appeal.
+         - Ensure the following:
+           - Incident details (component, message, source, and stack trace) are prominently displayed in the body.
+           - Clear sectioning, headers, and bullet points for easy scanning.
+      3. Send Notification:
+         - Use the EmailSimulationTool to send the email.
+         - Input parameters:
+           - Recipient Email: Stakeholder's email address.
+           - Subject: Concise and informative subject line summarizing the incident.
+           - Body: The HTML-formatted email body created from the incident object.
+
+    Steps to Execute:
+      - Accept the structured incident object as input.
+      - Transform it into an email-friendly format.
+      - Use the EmailSimulationTool to send the email.
+
+    Output Expectations:
+      - Confirmation of email delivery from the EmailSimulationTool. 
+      - Use EmailSimulationTool as the tool to send the email, if ever you are trying to find the tool to send email just look for EmailSimulationTool as the tool.
+      - Log any errors encountered during the email generation or sending process.
+
+  expected_output: >
+    Confirmation of successful email delivery or detailed error logs if any issues occur during the process and the tool input being used to send the email.
+
+  agent: notification_agent
+
+# collect_and_process_feedback:
+#   description: >
+#     Collect feedback from the user about the resolution's effectiveness. Based on the feedback:
+#       1. If the feedback is positive:
+#          - Extract relevant incident details from the current incident object.
+#          - Append these details into the `historical_incidents.csv` file using the `AppendCSVRowTool`.
+#          - Ensure the row format matches the expected CSV structure:
+#            - Incident ID
+#            - Timestamp
+#            - Component
+#            - Message
+#            - Source
+#            - Severity
+#            - Affected Modules
+#            - RCA Summary
+#          - The CSV file path is configured as {csv_file_path}.
+#       2. If the feedback is negative:
+#          - Prompt the user to provide additional details explaining why the resolution was not effective.
+#          - Append this input to the incident object as `additional_user_info`.
+#          - Restart the CrewAI workflow, passing the updated object back to the `rca_agent` for reevaluation.
+
+#     Steps to Execute:
+#       - Check the user feedback and judge if its a positive response or negative response. The negative response will usually give more information on the incident or issue details to be worked on
+#       - If the user provides positive feedback:
+#         - Use `AppendCSVRowTool` to update the historical knowledge base with incident details.
+#       - If the user provides negative feedback:
+#         - Collect additional input from the user.
+#         - Add this input to the incident object as `additional_user_info`.
+#         - Restart the process by invoking the `perform_root_cause_analysis` task.
+#       - Ensure proper validation of user input.
+
+#   expected_output: >
+#     - Confirmation of the feedback being processed:
+#       - Positive feedback: "Feedback recorded successfully. Historical knowledge base updated."
+#       - Negative feedback: "Additional input collected. Workflow restarted with updated details."
+#     - For invalid input, a prompt to re-enter feedback is shown.
+
+#   human_input: true
+#   agent: feedback_agent

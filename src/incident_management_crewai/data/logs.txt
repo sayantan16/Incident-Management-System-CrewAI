@@ -1,0 +1,8 @@
+[2024-12-04 10:05:12] CRITICAL: Application crash detected.
+Exception: NullPointerException
+Stack Trace:
+  at com.company.payment.PaymentProcessor.process(PaymentProcessor.java:87)
+  at com.company.payment.PaymentController.handlePayment(PaymentController.java:43)
+  at org.springframework.web.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:56)
+Affected Service: Payment Processing Service
+Host: app-server-01.company.com

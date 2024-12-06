@@ -1,0 +1,10 @@
+Incident ID,Timestamp,Component,Message,Source,Severity,Affected Modules,RCA Summary
+001,2024-11-01 14:25:00,Payment Processing Service,Application crash detected,app-server-01,CRITICAL,PaymentProcessor.java,A null pointer exception caused the application to crash.
+002,2024-11-02 09:15:00,Order Processing Service,High memory usage detected,app-server-02,WARNING,OrderProcessor.py,A memory leak in the OrderProcessor module increased memory usage.
+003,2024-11-05 16:45:00,Database,Deadlock encountered,db-server-01,CRITICAL,OrdersTable,Concurrent transactions caused a deadlock on OrdersTable.
+004,2024-11-10 10:00:00,Payment Gateway Integration,Payment timeout errors observed,gateway-server-03,CRITICAL,PaymentGatewayHandler,Network latency caused repeated payment timeout errors.
+005,2024-11-15 22:30:00,Logging Service,Log files exceeding storage limit,log-server-05,WARNING,LoggerService.java,Improper log rotation configuration caused logs to grow unchecked.
+006,2024-11-20 12:50:00,User Authentication Service,Failed login attempts spiking,auth-server-02,HIGH,AuthService.java,Brute-force login attempts overwhelmed the authentication service.
+007,2024-11-22 18:10:00,Database,Slow query execution,db-server-03,MEDIUM,CustomerTable,Missing index on the CustomerTable caused slow query performance.
+12345,2022-01-01 12:00:00,Server,Critical application crash resolved successfully,Monitoring System,High,"['Module A', 'Module B']",Memory leak issue
+8742,2024-12-04 10:05:12,N/A,Application crash detected.,app-server-01.company.com,CRITICAL,Payment Processing Service,Application crash caused by a null pointer exception.
