@@ -52,7 +52,7 @@ class Nodes:
             # Prepare the inputs for CrewAI kickoff
             inputs = {
                 "log_file_path": os.path.join(self.log_dir, log_file),
-                "csv_file_path": "/Users/sayantankundu/Documents/incident_management_crewai/history/historical_incidents.csv"
+                "csv_file_path": os.path.abspath(os.path.join(os.path.dirname(__file__), '../../history/historical_incidents.csv'))
             }
 
             print(f"Inputs passed to kickoff: {inputs}")

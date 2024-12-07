@@ -2,13 +2,14 @@ from langgraph.graph import StateGraph  # type: ignore
 from incident_management_crewai.state import LogState
 from .nodes import Nodes
 from incident_management_crewai.crew import IncidentManagementCrewai
+import os
 
 
 class LogOrchestrator:
     def __init__(self):
         self.crew_ai = IncidentManagementCrewai()
-        self.nodes = Nodes(
-            log_dir="/Users/sayantankundu/Documents/incident_management_crewai/src/incident_management_crewai/data", crew_ai=self.crew_ai)
+        self.nodes = Nodes(log_dir=os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '../../incident_management_crewai/data')), crew_ai=self.crew_ai)
         self.workflow = StateGraph(LogState)
 
         # Add nodes
