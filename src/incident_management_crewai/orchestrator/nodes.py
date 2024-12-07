@@ -12,7 +12,12 @@ class Nodes:
         existing_logs = state.get("log_queue", [])
         processed_logs = state.get("processed_logs", [])
 
-        all_logs = os.listdir(self.log_dir)
+        # List all log files, excluding .gitkeep and other hidden files
+        all_logs = [
+            log for log in os.listdir(self.log_dir)
+            if log != ".gitkeep" and not log.startswith(".")
+        ]
+
         new_logs = [
             log for log in all_logs
             if log not in existing_logs and log not in processed_logs
