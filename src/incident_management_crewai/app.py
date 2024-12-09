@@ -84,11 +84,10 @@ def read_classify_incident_severity_from_logs():
 
 app.layout = dbc.Container(fluid=False, className="p-4", children=[
 
-    # Store for severity counts
     dcc.Store(id='severity-store',
               data={"CRITICAL": 0, "ERROR": 0, "WARNING": 0, "INFO": 0}),
-    # Store for processed incidents to ensure we only increment once per unique incident
     dcc.Store(id='processed-incidents', data=[]),
+    dcc.Store(id='processed-once', data=False),
 
     dbc.Card(
         dbc.CardBody(
@@ -124,14 +123,14 @@ app.layout = dbc.Container(fluid=False, className="p-4", children=[
                         id='upload-log',
                         children=html.Button(
                             'Upload Log File', className="btn btn-primary"),
-                        multiple=False
+                        multiple=True
                     ),
                     html.Div(id='selected-file-name',
                              className="mt-2 text-white")
                 ], width=4),
                 dbc.Col([
-                    dbc.Button("Process Log",
-                               id="process-log-button", color="primary")
+                    dbc.Button("Process Log", id="process-log-button",
+                               color="primary", disabled=True)
                 ], width=4, className="d-flex align-items-start"),
                 dbc.Col([
                     dbc.Button("Add More Files", id="add-more-files-button",
@@ -251,14 +250,16 @@ def update_task_outputs(n, severity_data, processed_incidents):
                 html.H4(task.replace('_', ' ').title(),
                         className='card-title mb-3',
                         style={'fontSize': '20px', 'color': '#17a2b8', 'fontWeight': 'bold'}),
-                html.Pre(formatted_output,
-                         className='card-text text-white',
-                         style={
-                             'whiteSpace': 'pre-wrap',
-                             'wordBreak': 'break-all',
-                             'maxHeight': '200px',
-                             'overflowY': 'auto'
-                         }),
+                html.Pre(
+                    formatted_output,
+                    className='card-text text-white',
+                    style={
+                        'whiteSpace': 'pre-wrap',
+                        'wordBreak': 'break-all',
+                        'maxHeight': '200px',
+                        'overflowY': 'auto'
+                    }
+                ),
                 dbc.Alert("✅ Completed" if task_completed else "⏳ Processing...",
                           color="success" if task_completed else "warning", className="mt-3")
             ])
@@ -304,24 +305,38 @@ def update_task_outputs(n, severity_data, processed_incidents):
     Output('selected-file-name', 'children'),
     Input('upload-log', 'filename')
 )
-def show_selected_file(filename):
-    if filename:
-        return f"Selected File: {filename}"
-    return ""
+def show_selected_file(filenames):
+    if not filenames:
+        return ""
+    if isinstance(filenames, str):
+        return f"Selected Files: {filenames}"
+    else:
+        return "Selected Files: " + ", ".join(filenames)
 
 
 @app.callback(
     [Output('upload-status', 'children'),
-     Output('add-more-files-button', 'disabled')],
+     Output('add-more-files-button', 'disabled'),
+     Output('processed-once', 'data')],
     Input('process-log-button', 'n_clicks'),
     State('upload-log', 'filename'),
-    State('upload-log', 'contents')
+    State('upload-log', 'contents'),
+    State('processed-once', 'data')
 )
-def process_log(n_clicks, filename, contents):
-    if n_clicks and filename:
-        log_path = os.path.join(DATA_FOLDER_PATH, filename)
-        with open(log_path, "wb") as f:
-            f.write(contents.encode('utf-8'))
+def process_log(n_clicks, filenames, contents, processed_once):
+    if processed_once:
+        return "Already processed once. Please restart the app.", True, processed_once
+
+    if n_clicks and filenames:
+        if isinstance(filenames, str):
+            filenames = [filenames]
+            contents = [contents]
+
+        for fname, fcontent in zip(filenames, contents):
+            log_path = os.path.join(DATA_FOLDER_PATH, fname)
+            with open(log_path, "wb") as f:
+                f.write(fcontent.encode('utf-8'))
+
         clear_log_file()
 
         def run_orchestrator():
@@ -332,8 +347,26 @@ def process_log(n_clicks, filename, contents):
                 logging.error(f"Error during orchestrator run: {e}")
 
         threading.Thread(target=run_orchestrator).start()
-        return f"{filename}", False
-    return "Please upload a log file.", True
+        return f"Processing {', '.join(filenames)}...", False, True
+    return "Please upload a log file.", True, processed_once
+
+
+@app.callback(
+    Output('process-log-button', 'disabled'),
+    [Input('upload-log', 'filename'),
+     Input('processed-once', 'data')]
+)
+def toggle_process_button(filenames, processed_once):
+    # If we have already processed once, always disable
+    if processed_once:
+        return True
+
+    # If no filenames chosen, disable
+    if not filenames:
+        return True
+
+    # If filenames chosen and not processed once, enable
+    return False
 
 
 @app.callback(
@@ -375,11 +408,11 @@ def handle_modal(add_click, close_click, confirm_click, filenames, contents, is_
     Output('additional-files-names', 'children'),
     Input('additional-upload', 'filename')
 )
-def show_additional_files(filenames):
+def show_additional_files_modal(filenames):
     if filenames is None:
         return ""
     if isinstance(filenames, str):
-        return f"Selected File: {filenames}"
+        return f"Selected Files: {filenames}"
     else:
         files_list = [html.Li(file) for file in filenames]
         return html.Div([

@@ -6,7 +6,6 @@ import os
 
 import logging
 
-# Initialize logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
@@ -20,7 +19,7 @@ class LogOrchestrator:
         )
         self.workflow = StateGraph(LogState)
 
-        # Add nodes
+        # nodes
         self.workflow.add_node("monitor_logs", self.nodes.monitor_logs)
         self.workflow.add_node("process_log", self.nodes.process_single_log)
         self.workflow.add_node("wait", self.nodes.wait_next_run)

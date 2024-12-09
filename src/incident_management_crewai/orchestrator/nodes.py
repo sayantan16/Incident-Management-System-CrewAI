@@ -3,7 +3,6 @@ import time
 import logging
 import json
 
-# Initialize logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
@@ -12,7 +11,6 @@ class Nodes:
         self.log_dir = log_dir
         self.crew_ai = crew_ai
 
-        # Ensure the log directory exists
         os.makedirs(self.log_dir, exist_ok=True)
 
     def monitor_logs(self, state):
@@ -21,7 +19,6 @@ class Nodes:
         processed_logs = state.get("processed_logs", [])
         failed_logs = state.get("failed_logs", [])
 
-        # List all log files, excluding hidden files
         all_logs = [log for log in os.listdir(
             self.log_dir) if not log.startswith(".")]
 
@@ -64,7 +61,7 @@ class Nodes:
             logging.error(f"Failed to clear log file '{log_file_path}': {e}")
 
     def process_single_log(self, state):
-        self.clear_log_file()  # Clear the log file before starting
+        self.clear_log_file()
 
         if not state["log_queue"]:
             logging.info("No logs available in the queue to process.")

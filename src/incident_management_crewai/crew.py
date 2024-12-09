@@ -7,10 +7,8 @@ import threading
 import logging
 
 
-# Initialize logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
-# Task outputs dictionary and lock for thread-safe updates
 task_outputs = {}
 task_lock = threading.Lock()
 
