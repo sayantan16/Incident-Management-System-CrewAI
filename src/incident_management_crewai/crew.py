@@ -1,7 +1,25 @@
-from crewai import Agent, Crew, Process, Task  # type: ignore
-from crewai.project import CrewBase, agent, crew, task  # type: ignore
-from crewai_tools import CSVSearchTool, FileReadTool, EXASearchTool, FileWriterTool  # type: ignore
-from incident_management_crewai.tools.custom_tool import EmailSimulationTool, AppendCSVRowTool
+from crewai import Agent, Crew, Process, Task
+from crewai.tasks.task_output import TaskOutput
+from crewai.project import CrewBase, agent, crew, task
+from crewai_tools import CSVSearchTool, FileReadTool, EXASearchTool, FileWriterTool
+from tools.custom_tool import EmailSimulationTool, AppendCSVRowTool
+import threading
+import logging
+
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
+# Task outputs dictionary and lock for thread-safe updates
+task_outputs = {}
+task_lock = threading.Lock()
+
+
+def task_callback(output: TaskOutput):
+    with task_lock:
+        task_outputs[output.name] = output.raw
+        logging.info(f"""Task completed! Name: {
+                     output.name}, Output: {output.raw}""")
 
 
 def format_email(self, incident_details):
@@ -105,7 +123,6 @@ class IncidentManagementCrewai():
             config=self.agents_config['monitoring_agent'],
             tools=[FileReadTool()],
             verbose=True,
-            allow_delegation=False,
         )
 
     @agent
@@ -113,7 +130,6 @@ class IncidentManagementCrewai():
         return Agent(
             config=self.agents_config['classification_agent'],
             verbose=True,
-            allow_delegation=False,
         )
 
     @agent
@@ -122,7 +138,6 @@ class IncidentManagementCrewai():
             config=self.agents_config['rca_agent'],
             tools=[CSVSearchTool()],
             verbose=True,
-            allow_delegation=False,
         )
 
     @agent
@@ -131,7 +146,6 @@ class IncidentManagementCrewai():
             config=self.agents_config['resolution_agent'],
             tools=[EXASearchTool()],
             verbose=True,
-            allow_delegation=False,
         )
 
     @agent
@@ -157,31 +171,36 @@ class IncidentManagementCrewai():
     @task
     def monitor_system_logs(self) -> Task:
         return Task(
-            config=self.tasks_config['monitor_system_logs']
+            config=self.tasks_config['monitor_system_logs'],
+            callback=task_callback
         )
 
     @task
     def classify_incident_severity(self) -> Task:
         return Task(
-            config=self.tasks_config['classify_incident_severity']
+            config=self.tasks_config['classify_incident_severity'],
+            callback=task_callback
         )
 
     @task
     def perform_root_cause_analysis(self) -> Task:
         return Task(
-            config=self.tasks_config['perform_root_cause_analysis']
+            config=self.tasks_config['perform_root_cause_analysis'],
+            callback=task_callback
         )
 
     @task
     def suggest_resolutions(self) -> Task:
         return Task(
-            config=self.tasks_config['suggest_resolutions']
+            config=self.tasks_config['suggest_resolutions'],
+            callback=task_callback
         )
 
     @task
     def notify_stakeholders(self) -> Task:
         return Task(
             config=self.tasks_config['notify_stakeholders'],
+            callback=task_callback,
             on_run=lambda incident_details: self.notification_agent.run_tool(
                 tool_name="EmailSimulationTool",
                 arguments={
@@ -209,4 +228,6 @@ class IncidentManagementCrewai():
             tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
+            full_output=True,
+            output_log_file="/Users/sayantankundu/Documents/incident_management_crewai/src/incident_management_crewai/logs/crew_output.txt"
         )

@@ -1,0 +1,464 @@
+2024-12-09 15:26:47: task_name="monitor_system_logs", task="Process a single system log entry to organize it into a structured JSON format dynamically using LLM reasoning. The task involves:
+  - Parsing the log entry, whether it is structured (e.g., JSON, key-value pairs) or unstructured (e.g., raw text).
+  - Extracting and normalizing the following fields:
+    - Timestamp: The date and time of the log entry (e.g., [2024-12-04 08:45:23]).
+    - Severity: The severity level of the event (e.g., INFO, WARNING, ERROR, CRITICAL).
+    - Component: The system or application component generating the log (e.g., User Authentication Service).
+    - Message: A concise description of the log event (e.g., ERROR: Unable to establish database connection - Details: Connection timed out after 30 seconds).
+    - Source: The source of the log, typically the host or system name (e.g., auth-server-01.company.com). Look for keywords like "host" or any identifiable system name.
+    - Stack Trace: Any stack trace details present in the log, useful for debugging application errors.
+    - Additional Details: Any extra information in the log entry, such as resource metrics, error codes, or affected modules.
+
+- Leveraging LLM reasoning for dynamic interpretation:
+  - Detect and interpret log format (e.g., JSON, key-value pairs, or free text).
+  - Infer missing fields where possible based on context.
+  - Dynamically add extra elements or metadata not explicitly listed in the structure but found in the log.
+
+- Ensuring Consistency:
+  - If any field is missing or undefined, fill it with default values like "unknown", "N/A", or leave it empty.
+  - Include all required fields in the output JSON object for downstream processing.
+
+- The final output must be a structured JSON object that:
+  - Maintains consistency and integrity.
+  - Dynamically incorporates relevant additional data detected by the LLM.
+
+Log entry: /Users/sayantankundu/Documents/incident_management_crewai/src/incident_management_crewai/data/logs3.txt
+", agent="Adaptive Log Organizer Agent
+", status="started"
+
+2024-12-09 15:26:50: task_name="monitor_system_logs", task="Process a single system log entry to organize it into a structured JSON format dynamically using LLM reasoning. The task involves:
+  - Parsing the log entry, whether it is structured (e.g., JSON, key-value pairs) or unstructured (e.g., raw text).
+  - Extracting and normalizing the following fields:
+    - Timestamp: The date and time of the log entry (e.g., [2024-12-04 08:45:23]).
+    - Severity: The severity level of the event (e.g., INFO, WARNING, ERROR, CRITICAL).
+    - Component: The system or application component generating the log (e.g., User Authentication Service).
+    - Message: A concise description of the log event (e.g., ERROR: Unable to establish database connection - Details: Connection timed out after 30 seconds).
+    - Source: The source of the log, typically the host or system name (e.g., auth-server-01.company.com). Look for keywords like "host" or any identifiable system name.
+    - Stack Trace: Any stack trace details present in the log, useful for debugging application errors.
+    - Additional Details: Any extra information in the log entry, such as resource metrics, error codes, or affected modules.
+
+- Leveraging LLM reasoning for dynamic interpretation:
+  - Detect and interpret log format (e.g., JSON, key-value pairs, or free text).
+  - Infer missing fields where possible based on context.
+  - Dynamically add extra elements or metadata not explicitly listed in the structure but found in the log.
+
+- Ensuring Consistency:
+  - If any field is missing or undefined, fill it with default values like "unknown", "N/A", or leave it empty.
+  - Include all required fields in the output JSON object for downstream processing.
+
+- The final output must be a structured JSON object that:
+  - Maintains consistency and integrity.
+  - Dynamically incorporates relevant additional data detected by the LLM.
+
+Log entry: /Users/sayantankundu/Documents/incident_management_crewai/src/incident_management_crewai/data/logs3.txt
+", agent="Adaptive Log Organizer Agent
+", status="completed", output="{
+  "timestamp": "unknown",
+  "severity": "critical",
+  "component": "N/A",
+  "message": "No description available",
+  "source": "wertyu24",
+  "stack_trace": null,
+  "details": {
+    "error_code": null,
+    "affected_modules": null,
+    "metrics": {
+      "memory_usage": null,
+      "cpu_usage": "94.902083333352625%"
+    },
+    "additional_info": "High CPU utilisation detected for instance tagged as: , the utilisation is currently:94.902083333352625%"
+  },
+  "dynamic_fields": {
+    "alertname": "high_cpu",
+    "app_group": "APP!",
+    "instance": "acbpdafpp04.tsu.abcd.com:4545",
+    "job": "node_exporter",
+    "service": "os",
+    "summary": "CPU Utilisation Alert"
+  }
+}"
+
+2024-12-09 15:26:50: task_name="classify_incident_severity", task="Analyze a single structured incident log to assign severity and priority levels. The task involves:
+  1. Reviewing the log’s key details, including:
+     - Severity (initial indication, if present in input).
+     - Component (the affected system or application component).
+     - Message (event description or error details).
+     - Source (origin of the log).
+     - Stack Trace (if present, for debugging critical incidents).
+     - Additional Metadata (error codes, affected modules, resource metrics).
+  2. Assigning Severity and Priority:
+     - Severity levels:
+       - CRITICAL (1): Incidents causing immediate failure.
+       - ERROR (2): Errors disrupting functionality without full failure.
+       - WARNING (3): Issues needing attention but not affecting functionality.
+       - INFO (4): Informational logs with no required action.
+     - Priority levels (e.g., Critical, High, Medium, Low) based on severity and context.
+  3. Providing a detailed justification for the assigned severity and priority.
+
+Steps: - Evaluate the log’s impact based on its details and metadata. - Correlate its context with known patterns or historical data, if relevant. - Assign a severity and priority, ensuring the reasoning reflects the decision-making process.
+Input: A single structured log object provided as input. Example: {
+  "timestamp": "<timestamp>",
+  "severity": "<initial severity if available>",
+  "component": "<component>",
+  "message": "<message>",
+  "source": "<source>",
+  "stack_trace": "<stack trace or null>",
+  "details": {
+    "error_code": "<error code or null>",
+    "affected_modules": "<affected modules or null>",
+    "metrics": {
+      "memory_usage": "<memory usage or null>",
+      "cpu_usage": "<CPU usage or null>"
+    },
+    "additional_info": "<any other relevant information>"
+  }
+}
+", agent="Incident Severity Classifier Agent
+", status="started"
+
+2024-12-09 15:26:53: task_name="classify_incident_severity", task="Analyze a single structured incident log to assign severity and priority levels. The task involves:
+  1. Reviewing the log’s key details, including:
+     - Severity (initial indication, if present in input).
+     - Component (the affected system or application component).
+     - Message (event description or error details).
+     - Source (origin of the log).
+     - Stack Trace (if present, for debugging critical incidents).
+     - Additional Metadata (error codes, affected modules, resource metrics).
+  2. Assigning Severity and Priority:
+     - Severity levels:
+       - CRITICAL (1): Incidents causing immediate failure.
+       - ERROR (2): Errors disrupting functionality without full failure.
+       - WARNING (3): Issues needing attention but not affecting functionality.
+       - INFO (4): Informational logs with no required action.
+     - Priority levels (e.g., Critical, High, Medium, Low) based on severity and context.
+  3. Providing a detailed justification for the assigned severity and priority.
+
+Steps: - Evaluate the log’s impact based on its details and metadata. - Correlate its context with known patterns or historical data, if relevant. - Assign a severity and priority, ensuring the reasoning reflects the decision-making process.
+Input: A single structured log object provided as input. Example: {
+  "timestamp": "<timestamp>",
+  "severity": "<initial severity if available>",
+  "component": "<component>",
+  "message": "<message>",
+  "source": "<source>",
+  "stack_trace": "<stack trace or null>",
+  "details": {
+    "error_code": "<error code or null>",
+    "affected_modules": "<affected modules or null>",
+    "metrics": {
+      "memory_usage": "<memory usage or null>",
+      "cpu_usage": "<CPU usage or null>"
+    },
+    "additional_info": "<any other relevant information>"
+  }
+}
+", agent="Incident Severity Classifier Agent
+", status="completed", output="{
+  "timestamp": "unknown",
+  "severity": "critical",
+  "component": "N/A",
+  "message": "No description available",
+  "source": "wertyu24",
+  "stack_trace": null,
+  "details": {
+    "error_code": null,
+    "affected_modules": null,
+    "metrics": {
+      "memory_usage": null,
+      "cpu_usage": "94.902083333352625%"
+    },
+    "additional_info": "High CPU utilisation detected for instance tagged as: , the utilisation is currently:94.902083333352625%"
+  },
+  "dynamic_fields": {
+    "alertname": "high_cpu",
+    "app_group": "APP!",
+    "instance": "acbpdafpp04.tsu.abcd.com:4545",
+    "job": "node_exporter",
+    "service": "os",
+    "summary": "CPU Utilisation Alert"
+  },
+  "incident_metadata": {
+    "incident_id": "85729",
+    "severity": "CRITICAL",
+    "priority": "Critical",
+    "reason": "The incident is classified as CRITICAL due to the high CPU utilization of 94.902083333352625%, indicating a potential immediate performance impact on the system. Immediate action is necessary to address this issue and prevent service degradation."
+  }
+}"
+
+2024-12-09 15:26:53: task_name="perform_root_cause_analysis", task="Analyze a single incident to determine its root cause by leveraging historical data and LLM reasoning. This task involves:
+  1. Historical Data Search:
+     - Search for similar incidents in historical incident data stored in a CSV file. The path to csv file is /Users/sayantankundu/Documents/incident_management_crewai/src/history/historical_incidents.csv
+     - Match fields such as `component`, `severity`, and `message` to find patterns or similar past incidents.
+     - Use the RCA summaries of similar incidents as references but adapt them to the specific context of the current incident.
+  2. LLM-Based Reasoning:
+     - Use LLM reasoning to:
+       - Validate or refine RCAs derived from historical data.
+       - Independently generate RCAs for incidents where no historical match is found.
+     - Incorporate the following fields for analysis:
+       - Metadata (e.g., severity, priority, reason).
+       - Details (e.g., stack trace, metrics, error codes, affected modules).
+       - Contextual understanding of the incident's potential impact.
+  3. RCA Integration:
+     - Add a `root_cause_analysis` field to the incident object, containing:
+       - `summary`: A clear, concise explanation of the root cause.
+       - `validation_steps`: A description of the process used to determine the RCA, including historical comparisons and LLM reasoning.
+
+Steps to Process the Input:
+  - Accept a single incident object as input.
+  - Perform the following:
+     - Search historical data for patterns or matches to enhance the RCA.
+     - Apply LLM reasoning for validation or independent RCA generation.
+     - Append a `root_cause_analysis` field to the input object without altering any other fields.
+  - Return the enriched incident object as output.
+
+Error Handling:
+  - Handle incomplete or malformed fields gracefully by:
+    - Substituting `"N/A"` or `null` for missing data.
+    - Proceeding with LLM reasoning even if historical matches are unavailable.
+
+Output Requirements:
+  - Return the original incident object with an appended `root_cause_analysis` field:
+    - The structure of the input object must remain intact.
+    - Only the `root_cause_analysis` field should be added.
+    - Ensure clarity and accuracy in the RCA content, making it actionable for downstream processes.
+", agent="Root Cause Analysis Agent
+", status="started"
+
+2024-12-09 15:26:58: task_name="perform_root_cause_analysis", task="Analyze a single incident to determine its root cause by leveraging historical data and LLM reasoning. This task involves:
+  1. Historical Data Search:
+     - Search for similar incidents in historical incident data stored in a CSV file. The path to csv file is /Users/sayantankundu/Documents/incident_management_crewai/src/history/historical_incidents.csv
+     - Match fields such as `component`, `severity`, and `message` to find patterns or similar past incidents.
+     - Use the RCA summaries of similar incidents as references but adapt them to the specific context of the current incident.
+  2. LLM-Based Reasoning:
+     - Use LLM reasoning to:
+       - Validate or refine RCAs derived from historical data.
+       - Independently generate RCAs for incidents where no historical match is found.
+     - Incorporate the following fields for analysis:
+       - Metadata (e.g., severity, priority, reason).
+       - Details (e.g., stack trace, metrics, error codes, affected modules).
+       - Contextual understanding of the incident's potential impact.
+  3. RCA Integration:
+     - Add a `root_cause_analysis` field to the incident object, containing:
+       - `summary`: A clear, concise explanation of the root cause.
+       - `validation_steps`: A description of the process used to determine the RCA, including historical comparisons and LLM reasoning.
+
+Steps to Process the Input:
+  - Accept a single incident object as input.
+  - Perform the following:
+     - Search historical data for patterns or matches to enhance the RCA.
+     - Apply LLM reasoning for validation or independent RCA generation.
+     - Append a `root_cause_analysis` field to the input object without altering any other fields.
+  - Return the enriched incident object as output.
+
+Error Handling:
+  - Handle incomplete or malformed fields gracefully by:
+    - Substituting `"N/A"` or `null` for missing data.
+    - Proceeding with LLM reasoning even if historical matches are unavailable.
+
+Output Requirements:
+  - Return the original incident object with an appended `root_cause_analysis` field:
+    - The structure of the input object must remain intact.
+    - Only the `root_cause_analysis` field should be added.
+    - Ensure clarity and accuracy in the RCA content, making it actionable for downstream processes.
+", agent="Root Cause Analysis Agent
+", status="completed", output="{
+  "timestamp": "unknown",
+  "severity": "critical",
+  "component": "N/A",
+  "message": "No description available",
+  "source": "wertyu24",
+  "stack_trace": null,
+  "details": {
+    "error_code": null,
+    "affected_modules": null,
+    "metrics": {
+      "memory_usage": null,
+      "cpu_usage": "94.902083333352625%"
+    },
+    "additional_info": "High CPU utilisation detected for instance tagged as: , the utilisation is currently:94.902083333352625%"
+  },
+  "dynamic_fields": {
+    "alertname": "high_cpu",
+    "app_group": "APP!",
+    "instance": "acbpdafpp04.tsu.abcd.com:4545",
+    "job": "node_exporter",
+    "service": "os",
+    "summary": "CPU Utilisation Alert"
+  },
+  "incident_metadata": {
+    "incident_id": "85729",
+    "severity": "CRITICAL",
+    "priority": "Critical",
+    "reason": "The incident is classified as CRITICAL due to the high CPU utilization of 94.902083333352625%, indicating a potential immediate performance impact on the system. Immediate action is necessary to address this issue and prevent service degradation."
+  },
+  "root_cause_analysis": {
+    "summary": "The high CPU utilization is likely caused by inefficient code execution or an ongoing process consuming excessive resources.",
+    "validation_steps": "The RCA summary is derived by analyzing historical incidents with similar high resource utilization patterns. The root cause inference is supported by the detected high CPU usage and the absence of error codes or affected modules."
+  }
+}"
+
+2024-12-09 15:26:58: task_name="suggest_resolutions", task="Enrich a single incident object with actionable solutions derived from external and internal analysis. 
+Task Steps: - Process the incident object as follows:
+  1. Internet Search (Exa Search Tool):
+     - Retrieve contextual resolutions based on the incident details.
+     - Construct a search query using fields like `component`, `message`, and `root_cause_analysis.summary`.
+     - Append the results to the incident object under the `internet_resolution` field:
+       - If relevant resolutions are found, include them as a list.
+       - If no resolutions are found, append `"No relevant resolutions found on the internet."`.
+  2. LLM-Based Reasoning:
+     - Analyze the incident object holistically.
+     - Generate two logical and actionable resolutions tailored to the incident.
+     - Append these to the `llm_resolution` field of the incident object.
+- Ensure that:
+  - The original structure and fields of the incident object are preserved.
+  - Only the `internet_resolution` and `llm_resolution` fields are added.
+
+Error Handling: - Handle missing or null fields gracefully by:
+  - Using default values like `"N/A"` or `null` for missing information.
+  - Allowing the LLM to adapt to incomplete data for resolution generation.
+
+Output Requirements: - Return the enriched incident object with two additional fields:
+  - `internet_resolution`: Resolutions retrieved using the Exa Search tool.
+  - `llm_resolution`: Resolutions generated by the LLM.
+- Ensure the original structure of the incident object remains intact.
+", agent="Suggest Resolutions Agent
+", status="started"
+
+2024-12-09 15:27:09: task_name="suggest_resolutions", task="Enrich a single incident object with actionable solutions derived from external and internal analysis. 
+Task Steps: - Process the incident object as follows:
+  1. Internet Search (Exa Search Tool):
+     - Retrieve contextual resolutions based on the incident details.
+     - Construct a search query using fields like `component`, `message`, and `root_cause_analysis.summary`.
+     - Append the results to the incident object under the `internet_resolution` field:
+       - If relevant resolutions are found, include them as a list.
+       - If no resolutions are found, append `"No relevant resolutions found on the internet."`.
+  2. LLM-Based Reasoning:
+     - Analyze the incident object holistically.
+     - Generate two logical and actionable resolutions tailored to the incident.
+     - Append these to the `llm_resolution` field of the incident object.
+- Ensure that:
+  - The original structure and fields of the incident object are preserved.
+  - Only the `internet_resolution` and `llm_resolution` fields are added.
+
+Error Handling: - Handle missing or null fields gracefully by:
+  - Using default values like `"N/A"` or `null` for missing information.
+  - Allowing the LLM to adapt to incomplete data for resolution generation.
+
+Output Requirements: - Return the enriched incident object with two additional fields:
+  - `internet_resolution`: Resolutions retrieved using the Exa Search tool.
+  - `llm_resolution`: Resolutions generated by the LLM.
+- Ensure the original structure of the incident object remains intact.
+", agent="Suggest Resolutions Agent
+", status="completed", output="{
+  "timestamp": "unknown",
+  "severity": "critical",
+  "component": "N/A",
+  "message": "No description available",
+  "source": "wertyu24",
+  "stack_trace": null,
+  "details": {
+    "error_code": null,
+    "affected_modules": null,
+    "metrics": {
+      "memory_usage": null,
+      "cpu_usage": "94.902083333352625%"
+    },
+    "additional_info": "High CPU utilisation detected for instance tagged as: , the utilisation is currently:94.902083333352625%"
+  },
+  "dynamic_fields": {
+    "alertname": "high_cpu",
+    "app_group": "APP!",
+    "instance": "acbpdafpp04.tsu.abcd.com:4545",
+    "job": "node_exporter",
+    "service": "os",
+    "summary": "CPU Utilisation Alert"
+  },
+  "incident_metadata": {
+    "incident_id": "85729",
+    "severity": "CRITICAL",
+    "priority": "Critical",
+    "reason": "The incident is classified as CRITICAL due to the high CPU utilization of 94.902083333352625%, indicating a potential immediate performance impact on the system. Immediate action is necessary to address this issue and prevent service degradation."
+  },
+  "root_cause_analysis": {
+    "summary": "The high CPU utilization is likely caused by inefficient code execution or an ongoing process consuming excessive resources.",
+    "validation_steps": "The RCA summary is derived by analyzing historical incidents with similar high resource utilization patterns. The root cause inference is supported by the detected high CPU usage and the absence of error codes or affected modules."
+  },
+  "internet_resolution": [
+    "1. Refer to Microsoft's guidance for troubleshooting high CPU issues on Azure virtual machines: [Troubleshoot high-CPU issues for Azure virtual machines](https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/troubleshoot-high-cpu-issues-azure-windows-vm)",
+    "2. Explore troubleshooting steps for high CPU usage on RDS instances from AWS: [Troubleshoot high CPU usage on RDS for MySQL or Aurora MySQL](https://aws.amazon.com/premiumsupport/knowledge-center/rds-instance-high-cpu/)"
+  ],
+  "llm_resolution": [
+    "1. Investigate the possibility of inefficient code execution as a root cause for the high CPU utilization, optimize code and processes accordingly.",
+    "2. Implement monitoring solutions to track CPU usage trends and identify any abnormal spikes in utilization for proactive intervention."
+  ]
+}"
+
+2024-12-09 15:27:09: task_name="notify_stakeholders", task="Create and send a detailed notification email based on the provided incident object. The task involves:
+  1. Transform Incident Object:
+     - Convert the structured incident object into an intuitive and human-readable email format.
+     - Include the following sections:
+       - Incident Overview: Summarize key details like `timestamp`, `severity`, `component`, `message`, `source`, and `stack_trace` for clarity.
+       - Incident Metadata: Present `incident_id`, `priority`, and `reason` for classification.
+       - Root Cause Analysis: Clearly explain the root cause with `summary` and `validation_steps`.
+       - Suggested Resolutions:
+         - Internet-Sourced Resolutions: Present `internet_resolution` as a bulleted list of external suggestions.
+         - LLM-Generated Resolutions: Highlight `llm_resolution` as actionable steps derived from reasoning.
+       - Action Required: Clearly indicate any immediate actions required by stakeholders.
+  2. Prepare Email Content:
+     - Use HTML for formatting the email body to enhance readability and visual appeal.
+     - Ensure the following:
+       - Incident details (component, message, source, and stack trace) are prominently displayed in the body.
+       - Clear sectioning, headers, and bullet points for easy scanning.
+  3. Send Notification:
+     - Use the EmailSimulationTool to send the email.
+     - Input parameters:
+       - Recipient Email: Stakeholder's email address.
+       - Subject: Concise and informative subject line summarizing the incident.
+       - Body: The HTML-formatted email body created from the incident object.
+
+Steps to Execute:
+  - Accept the structured incident object as input.
+  - Transform it into an email-friendly format.
+  - Use the EmailSimulationTool to send the email.
+
+Output Expectations:
+  - Confirmation of email delivery from the EmailSimulationTool. 
+  - Use EmailSimulationTool as the tool to send the email, if ever you are trying to find the tool to send email just look for EmailSimulationTool as the tool.
+  - Log any errors encountered during the email generation or sending process.
+", agent="Notification Agent
+", status="started"
+
+2024-12-09 15:27:14: task_name="notify_stakeholders", task="Create and send a detailed notification email based on the provided incident object. The task involves:
+  1. Transform Incident Object:
+     - Convert the structured incident object into an intuitive and human-readable email format.
+     - Include the following sections:
+       - Incident Overview: Summarize key details like `timestamp`, `severity`, `component`, `message`, `source`, and `stack_trace` for clarity.
+       - Incident Metadata: Present `incident_id`, `priority`, and `reason` for classification.
+       - Root Cause Analysis: Clearly explain the root cause with `summary` and `validation_steps`.
+       - Suggested Resolutions:
+         - Internet-Sourced Resolutions: Present `internet_resolution` as a bulleted list of external suggestions.
+         - LLM-Generated Resolutions: Highlight `llm_resolution` as actionable steps derived from reasoning.
+       - Action Required: Clearly indicate any immediate actions required by stakeholders.
+  2. Prepare Email Content:
+     - Use HTML for formatting the email body to enhance readability and visual appeal.
+     - Ensure the following:
+       - Incident details (component, message, source, and stack trace) are prominently displayed in the body.
+       - Clear sectioning, headers, and bullet points for easy scanning.
+  3. Send Notification:
+     - Use the EmailSimulationTool to send the email.
+     - Input parameters:
+       - Recipient Email: Stakeholder's email address.
+       - Subject: Concise and informative subject line summarizing the incident.
+       - Body: The HTML-formatted email body created from the incident object.
+
+Steps to Execute:
+  - Accept the structured incident object as input.
+  - Transform it into an email-friendly format.
+  - Use the EmailSimulationTool to send the email.
+
+Output Expectations:
+  - Confirmation of email delivery from the EmailSimulationTool. 
+  - Use EmailSimulationTool as the tool to send the email, if ever you are trying to find the tool to send email just look for EmailSimulationTool as the tool.
+  - Log any errors encountered during the email generation or sending process.
+", agent="Notification Agent
+", status="completed", output="Email successfully sent to the stakeholder with all the necessary detailed incident information presented in a human-readable format, including incident overview, metadata, root cause analysis, suggested resolutions, and clear action required."
+

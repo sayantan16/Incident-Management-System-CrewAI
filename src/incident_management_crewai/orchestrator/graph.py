@@ -1,15 +1,23 @@
-from langgraph.graph import StateGraph  # type: ignore
-from incident_management_crewai.state import LogState
+from langgraph.graph import StateGraph
+from state import LogState
 from .nodes import Nodes
-from incident_management_crewai.crew import IncidentManagementCrewai
+from crew import IncidentManagementCrewai
 import os
+
+import logging
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
 class LogOrchestrator:
     def __init__(self):
         self.crew_ai = IncidentManagementCrewai()
-        self.nodes = Nodes(log_dir=os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '../../incident_management_crewai/data')), crew_ai=self.crew_ai)
+        self.nodes = Nodes(
+            log_dir=os.path.abspath(os.path.join(
+                os.path.dirname(__file__), '../../incident_management_crewai/data')),
+            crew_ai=self.crew_ai
+        )
         self.workflow = StateGraph(LogState)
 
         # Add nodes
@@ -32,10 +40,15 @@ class LogOrchestrator:
         self.app = self.workflow.compile()
 
     def run(self):
+        logging.info("Orchestrator started.")
         initial_state = {
             "log_queue": [],
             "failed_logs": [],
             "processed_logs": [],
             "retry_count": {}
         }
-        self.app.invoke(initial_state)
+        try:
+            self.app.invoke(initial_state)
+            logging.info("Orchestrator finished successfully.")
+        except Exception as e:
+            logging.error(f"Orchestrator encountered an error: {e}")
