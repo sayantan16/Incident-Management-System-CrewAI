@@ -165,4 +165,6 @@ The agent will process the log files, and notifications will appear in MailHog a
 - For testing, keep placing multiple log files in the `data` folder.
 - To stop the agent, interrupt the process in the terminal
 
+
+- Run the app - python src/incident_management_crewai/app.py
 ---
