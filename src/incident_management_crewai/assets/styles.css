@@ -1,0 +1,206 @@
+body {
+  font-family: 'Helvetica Neue', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  color: #fff;
+  background: linear-gradient(-45deg, #232526, #0c2238, #232526, #414345);
+  background-size: 400% 400%;
+  animation: backgroundAnimation 25s ease infinite;
+}
+
+@keyframes backgroundAnimation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+.workflow-container {
+  position: relative;
+  min-height: 700px;
+  border: 1px solid #17a2b8;
+  border-radius: 5px;
+  padding: 30px;
+  margin-bottom: 40px;
+}
+
+.zigzag-layout {
+  position: relative;
+  width: 1000px;
+  height: 800px; 
+  margin: auto;
+}
+
+/* Card positions */
+.card1 { top: 50px; left: 100px; }
+.card2 { top: 50px; left: 500px; }
+.card3 { top: 300px; left: 500px; }
+.card4 { top: 300px; left: 100px; }
+.card5 { top: 550px; left: 100px; }
+
+.zigzag-layout > .workflow-card {
+  position: absolute;
+}
+
+/* Arrows initially with no width/height for animation */
+.arrow-1-2,
+.arrow-2-3,
+.arrow-3-4,
+.arrow-4-5 {
+  position: absolute;
+  background: #17a2b8;
+  opacity: 1;
+}
+
+/* Arrow positions */
+.arrow-1-2 {
+  top: 150px;
+  left: 400px;
+  width: 0px; /* animate to 100px */
+  height: 2px;
+}
+.arrow-1-2::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: #17a2b8;
+}
+
+.arrow-2-3 {
+  top: 250px;
+  left: 650px;
+  width: 2px;
+  height: 0px; /* animate to 50px */
+}
+.arrow-2-3::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #17a2b8;
+}
+
+.arrow-3-4 {
+  top: 400px;
+  left: 400px;
+  width: 0px; /* animate to 100px */
+  height: 2px;
+}
+.arrow-3-4::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-100%, -50%);
+  border: 5px solid transparent;
+  border-right-color: #17a2b8;
+}
+
+.arrow-4-5 {
+  top: 500px;
+  left: 250px;
+  width: 2px;
+  height: 0px; /* animate to 50px */
+}
+.arrow-4-5::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #17a2b8;
+}
+
+/* Cards */
+.workflow-card {
+  background: #333;
+  border: 2px solid #17a2b8;
+  border-radius: 5px;
+  width: 500px;
+  height: 700px;
+  padding: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform-origin: center center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.workflow-card.pending {
+  border-color: grey;
+}
+.workflow-card.in-progress {
+  border-color: yellow;
+}
+.workflow-card.completed {
+  border-color: green;
+}
+
+.workflow-card-title {
+  color: #17a2b8;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.workflow-card-output-container {
+  height: 200px;
+  overflow: auto;
+  margin-top: 5px;
+}
+
+.workflow-card-output {
+  color: #fff;
+  font-size: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+/* On hover, scale card slightly */
+.workflow-card:hover {
+  z-index: 99;
+  transform: scale(2.0);
+  box-shadow: 0 0 20px rgba(0,0,0,0.7);
+}
+
+/* Buttons */
+.animated-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+  z-index: 1;
+}
+
+.animated-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+}
+
+.animated-btn:hover {
+  transform: scale(1.05);
+}
+
+.animated-btn:active::after {
+  width: 100px;
+  height: 100px;
+  opacity: 1;
+  transition: none;
+}

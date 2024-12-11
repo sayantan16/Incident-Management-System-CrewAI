@@ -6,23 +6,28 @@ import os
 import threading
 from orchestrator.graph import LogOrchestrator
 import logging
-from threading import Lock
 import json
 import glob
 import base64
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[dbc.themes.DARKLY],
+    external_scripts=[
+        "https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"
+    ]
+)
 server = app.server
 orchestrator = LogOrchestrator()
 
 tasks = [
-    "monitor_system_logs",
-    "classify_incident_severity",
-    "perform_root_cause_analysis",
-    "suggest_resolutions",
-    "notify_stakeholders"
+    "monitor_system_logs",          # card1, top-left
+    "classify_incident_severity",   # card2, top-right
+    "perform_root_cause_analysis",  # card3, second row right
+    "suggest_resolutions",          # card4, second row left
+    "notify_stakeholders"           # card5, third row left
 ]
 
 DATA_FOLDER_PATH = "/Users/sayantankundu/Documents/incident_management_crewai/src/incident_management_crewai/data"
@@ -40,7 +45,6 @@ def clear_log_file():
 
 
 def read_classify_incident_severity_from_logs():
-    """Read the classify_incident_severity output from the log file directly and return parsed JSON if found."""
     if not os.path.exists(LOG_FILE_PATH):
         return None
 
@@ -88,6 +92,7 @@ app.layout = dbc.Container(fluid=False, className="p-4", children=[
               data={"CRITICAL": 0, "ERROR": 0, "WARNING": 0, "INFO": 0}),
     dcc.Store(id='processed-incidents', data=[]),
     dcc.Store(id='processed-once', data=False),
+    dcc.Store(id='arrow-trigger', data={"completed_task": None}),
 
     dbc.Card(
         dbc.CardBody(
@@ -111,9 +116,10 @@ app.layout = dbc.Container(fluid=False, className="p-4", children=[
         ])
     ]),
 
-    html.H4("Task Outputs", className="text-white mb-3"),
-
-    html.Div(id='task-output-cards', className="mb-4"),
+    html.H4("Task Workflow", className="text-white mb-3"),
+    html.Div(id='workflow-container', className='workflow-container', children=[
+        html.Div(id='task-workflow', className='zigzag-layout')
+    ]),
 
     dbc.Card(
         dbc.CardBody([
@@ -122,19 +128,20 @@ app.layout = dbc.Container(fluid=False, className="p-4", children=[
                     dcc.Upload(
                         id='upload-log',
                         children=html.Button(
-                            'Upload Log File', className="btn btn-primary"),
-                        multiple=True
+                            'Upload Log File', className="btn btn-primary animated-btn"),
+                        multiple=True,
+                        disabled=False
                     ),
                     html.Div(id='selected-file-name',
                              className="mt-2 text-white")
                 ], width=4),
                 dbc.Col([
                     dbc.Button("Process Log", id="process-log-button",
-                               color="primary", disabled=True)
+                               color="primary", disabled=True, className="animated-btn")
                 ], width=4, className="d-flex align-items-start"),
                 dbc.Col([
                     dbc.Button("Add More Files", id="add-more-files-button",
-                               color="secondary", disabled=True)
+                               color="secondary", disabled=True, className="animated-btn")
                 ], width=4, className="d-flex align-items-start")
             ], className="mb-3", justify="around"),
             dbc.Spinner(html.Div(id='upload-status',
@@ -150,7 +157,7 @@ app.layout = dbc.Container(fluid=False, className="p-4", children=[
                 dcc.Upload(
                     id='additional-upload',
                     children=html.Button(
-                        'Select Files', className="btn btn-primary"),
+                        'Select Files', className="btn btn-primary animated-btn"),
                     multiple=True
                 ),
                 html.Div(id='additional-files-names',
@@ -158,9 +165,9 @@ app.layout = dbc.Container(fluid=False, className="p-4", children=[
             ]),
             dbc.ModalFooter([
                 dbc.Button("Confirm", id="confirm-add-files",
-                           color="success", className="me-2"),
+                           color="success", className="me-2 animated-btn"),
                 dbc.Button("Close", id="close-add-files-modal",
-                           className="btn btn-secondary")
+                           className="btn btn-secondary animated-btn")
             ])
         ],
         id="add-files-modal",
@@ -175,10 +182,13 @@ app.layout = dbc.Container(fluid=False, className="p-4", children=[
 @app.callback(
     Output('severity-bar-chart', 'figure'),
     Input('interval-component', 'n_intervals'),
-    State('severity-store', 'data')
+    State('severity-store', 'data'),
+    State('processed-incidents', 'data')
 )
-def update_bar_chart(n, severity_data):
-    total_count = sum(severity_data.values())
+def update_bar_chart(n, severity_data, processed_incidents):
+    # Show total based on number of processed incidents
+    total_count = len(processed_incidents)
+
     df = pd.DataFrame(list(severity_data.items()),
                       columns=["Severity", "Count"])
     fig = {
@@ -186,7 +196,8 @@ def update_bar_chart(n, severity_data):
             'x': df['Severity'],
             'y': df['Count'],
             'type': 'bar',
-            'marker': {'color': '#17a2b8'}
+            'marker': {'color': '#17a2b8'},
+            'name': 'Log Severity'
         }],
         'layout': {
             'plot_bgcolor': '#222222',
@@ -194,36 +205,31 @@ def update_bar_chart(n, severity_data):
             'font': {'color': 'white'},
             'xaxis': {'title': 'Severity'},
             'yaxis': {'title': 'Count', 'autorange': True},
-            'title': f'Log Severity Levels (Total: {total_count})'
+            'title': f'Log Severity Levels',
+            'transition': {'duration': 500, 'easing': 'cubic-in-out'}
         }
     }
     return fig
 
 
 @app.callback(
-    [Output('task-output-cards', 'children'),
+    [Output('task-workflow', 'children'),
      Output('severity-store', 'data'),
-     Output('processed-incidents', 'data')],
+     Output('processed-incidents', 'data'),
+     Output('arrow-trigger', 'data')],
     Input('interval-component', 'n_intervals'),
     State('severity-store', 'data'),
-    State('processed-incidents', 'data')
+    State('processed-incidents', 'data'),
+    State('arrow-trigger', 'data')
 )
-def update_task_outputs(n, severity_data, processed_incidents):
+def update_task_outputs(n, severity_data, processed_incidents, arrow_data):
     task_data = parse_log_file()
-    cards = []
 
     rca_completed = False
     classify_completed = False
+    completed_tasks_indices = []
 
-    if task_data.get("perform_root_cause_analysis"):
-        if 'status="completed"' in task_data["perform_root_cause_analysis"]:
-            rca_completed = True
-
-    if task_data.get("classify_incident_severity"):
-        if 'status="completed"' in task_data["classify_incident_severity"]:
-            classify_completed = True
-
-    for task in tasks:
+    for i, task in enumerate(tasks):
         output = task_data.get(task)
         formatted_output = "⏳ In Progress..."
         task_completed = False
@@ -245,36 +251,61 @@ def update_task_outputs(n, severity_data, processed_incidents):
             except (json.JSONDecodeError, ValueError):
                 formatted_output = output
 
-        card = dbc.Card([
-            dbc.CardBody([
-                html.H4(task.replace('_', ' ').title(),
-                        className='card-title mb-3',
-                        style={'fontSize': '20px', 'color': '#17a2b8', 'fontWeight': 'bold'}),
-                html.Pre(
-                    formatted_output,
-                    className='card-text text-white',
-                    style={
-                        'whiteSpace': 'pre-wrap',
-                        'wordBreak': 'break-all',
-                        'maxHeight': '200px',
-                        'overflowY': 'auto'
-                    }
-                ),
-                dbc.Alert("✅ Completed" if task_completed else "⏳ Processing...",
-                          color="success" if task_completed else "warning", className="mt-3")
-            ])
-        ], className='mb-3 bg-dark border-info')
-        cards.append(card)
+        status_class = "pending"
+        if 'In Progress' in formatted_output:
+            status_class = "in-progress"
+        if task_completed:
+            status_class = "completed"
+            completed_tasks_indices.append(i)
 
-    # If both tasks are completed, try to increment severity if new incident
+        card = dbc.Card(
+            [
+                html.H5(task.replace('_', ' ').title(),
+                        className='workflow-card-title'),
+                html.Div(
+                    html.Pre(formatted_output,
+                             className='workflow-card-output'),
+                    className='workflow-card-output-container'
+                )
+            ],
+            className=f'workflow-card {status_class} card{i+1}',
+            style={"width": "300px", "height": "200px"}
+        )
+
+        if i == 0:
+            card1 = card
+        elif i == 1:
+            card2 = card
+        elif i == 2:
+            card3 = card
+        elif i == 3:
+            card4 = card
+        elif i == 4:
+            card5 = card
+
+    layout = html.Div([
+        card1,
+        card2,
+        card3,
+        card4,
+        card5,
+        html.Div(className='wf-arrow arrow-1-2'),
+        html.Div(className='wf-arrow arrow-2-3'),
+        html.Div(className='wf-arrow arrow-3-4'),
+        html.Div(className='wf-arrow arrow-4-5')
+    ], className='zigzag-layout')
+
+    if task_data.get("perform_root_cause_analysis") and 'status="completed"' in task_data["perform_root_cause_analysis"]:
+        rca_completed = True
+    if task_data.get("classify_incident_severity") and 'status="completed"' in task_data["classify_incident_severity"]:
+        classify_completed = True
+
     if rca_completed and classify_completed:
         parsed = read_classify_incident_severity_from_logs()
         if parsed and isinstance(parsed, dict):
             incident_meta = parsed.get("incident_metadata", {})
             reason = incident_meta.get("reason", "").upper()
             incident_id = incident_meta.get("incident_id", None)
-
-            # Only increment if we have a new incident_id
             if incident_id and incident_id not in processed_incidents:
                 severity_to_increment = None
                 if "CRITICAL" in reason:
@@ -290,15 +321,19 @@ def update_task_outputs(n, severity_data, processed_incidents):
                     severity_data[severity_to_increment] += 1
                     processed_incidents.append(incident_id)
 
-    layout = html.Div([
-        dbc.Row([dbc.Col(cards[0] if len(cards) > 0 else html.Div(), width=6),
-                 dbc.Col(cards[1] if len(cards) > 1 else html.Div(), width=6)], className="mb-3"),
-        dbc.Row([dbc.Col(cards[2] if len(cards) > 2 else html.Div(), width=6),
-                 dbc.Col(cards[3] if len(cards) > 3 else html.Div(), width=6)], className="mb-3"),
-        dbc.Row([dbc.Col(cards[4] if len(cards) > 4 else html.Div(), width=6),
-                 dbc.Col(html.Div(), width=6)])
-    ])
-    return layout, severity_data, processed_incidents
+    # Arrow triggering logic unchanged
+    previously_completed_task = arrow_data.get("completed_task", None)
+    new_completed_task = None
+    for i, task in enumerate(tasks):
+        if i in completed_tasks_indices:
+            if previously_completed_task is None or i > previously_completed_task:
+                new_completed_task = i
+                break
+
+    if new_completed_task is not None:
+        arrow_data["completed_task"] = new_completed_task
+
+    return layout, severity_data, processed_incidents, arrow_data
 
 
 @app.callback(
@@ -314,10 +349,13 @@ def show_selected_file(filenames):
         return "Selected Files: " + ", ".join(filenames)
 
 
+# Original logic restored, just add what you requested
 @app.callback(
     [Output('upload-status', 'children'),
      Output('add-more-files-button', 'disabled'),
-     Output('processed-once', 'data')],
+     Output('processed-once', 'data'),
+     Output('add-more-files-button', 'color'),
+     Output('upload-log', 'disabled')],
     Input('process-log-button', 'n_clicks'),
     State('upload-log', 'filename'),
     State('upload-log', 'contents'),
@@ -325,7 +363,7 @@ def show_selected_file(filenames):
 )
 def process_log(n_clicks, filenames, contents, processed_once):
     if processed_once:
-        return "Already processed once. Please restart the app.", True, processed_once
+        return "Already processed once. Please restart the app.", True, processed_once, "secondary", False
 
     if n_clicks and filenames:
         if isinstance(filenames, str):
@@ -347,8 +385,14 @@ def process_log(n_clicks, filenames, contents, processed_once):
                 logging.error(f"Error during orchestrator run: {e}")
 
         threading.Thread(target=run_orchestrator).start()
-        return f"Processing {', '.join(filenames)}...", False, True
-    return "Please upload a log file.", True, processed_once
+
+        # After processing:
+        # - Add more files button enabled (False for disabled means enabled)
+        # - Change add-more-files-button color to "info"
+        # - Disable upload log file
+        return f"Processing {', '.join(filenames)}...", False, True, "info", True
+
+    return "Please upload a log file.", True, processed_once, "secondary", False
 
 
 @app.callback(
@@ -357,30 +401,22 @@ def process_log(n_clicks, filenames, contents, processed_once):
      Input('processed-once', 'data')]
 )
 def toggle_process_button(filenames, processed_once):
-    # If we have already processed once, always disable
+    # Original logic: enable process button if a file is chosen and not processed once
     if processed_once:
         return True
-
-    # If no filenames chosen, disable
     if not filenames:
         return True
-
-    # If filenames chosen and not processed once, enable
     return False
 
 
 @app.callback(
     Output('add-files-modal', 'is_open'),
-    [
-        Input('add-more-files-button', 'n_clicks'),
-        Input('close-add-files-modal', 'n_clicks'),
-        Input('confirm-add-files', 'n_clicks')
-    ],
-    [
-        State('additional-upload', 'filename'),
-        State('additional-upload', 'contents'),
-        State('add-files-modal', 'is_open')
-    ]
+    [Input('add-more-files-button', 'n_clicks'),
+     Input('close-add-files-modal', 'n_clicks'),
+     Input('confirm-add-files', 'n_clicks')],
+    [State('additional-upload', 'filename'),
+     State('additional-upload', 'contents'),
+     State('add-files-modal', 'is_open')]
 )
 def handle_modal(add_click, close_click, confirm_click, filenames, contents, is_open):
     triggered_id = ctx.triggered_id if hasattr(ctx, 'triggered_id') else None
@@ -426,7 +462,7 @@ def show_additional_files_modal(filenames):
     Input('add-more-files-button', 'n_clicks')
 )
 def add_more_files(n_clicks):
-    return html.Button('Upload Log File', className="btn btn-primary")
+    return html.Button('Upload Log File', className="btn btn-primary animated-btn")
 
 
 def parse_log_file():
